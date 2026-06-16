@@ -1,0 +1,6 @@
+{
+  "expo": {
+    "plugins": ["expo-router", "expo-status-bar"],
+    "scheme": "your-app-scheme"
+  }
+}
