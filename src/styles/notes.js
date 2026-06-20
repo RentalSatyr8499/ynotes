@@ -44,6 +44,14 @@ export const noteScreenStyles = StyleSheet.create({
     paddingTop: 12,
     paddingBottom: 6,
   },
+  editablePreviewScroll: {
+    flex: 1,
+    backgroundColor: '#fafafa',
+  },
+  editablePreviewContent: {
+    padding: 16,
+    paddingTop: 4,
+  },
 });
 
 export const editorStyles = StyleSheet.create({
@@ -55,6 +63,14 @@ export const editorStyles = StyleSheet.create({
     lineHeight: 20,
     padding: 16,
     paddingTop: 4,
+  },
+  activeLineInput: {
+    fontFamily: MONO,
+    fontSize: 15,
+    lineHeight: 22,
+    color: '#1a1a1a',
+    padding: 0,
+    margin: 0,
   },
 });
 

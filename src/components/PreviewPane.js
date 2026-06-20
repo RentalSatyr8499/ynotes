@@ -5,8 +5,9 @@
 
 import React, { useMemo } from 'react';
 import { View, Text, ScrollView } from 'react-native';
-import { parseBlocks } from '../features/notes/Markdown';
-import { noteScreenStyles, previewStyles } from '../styles/notes';
+import { parseBlocks } from '../features/notes/markdown';
+import { screenStyles } from '../styles/screen';
+import { previewStyles } from '../styles/preview';
 import InlineText from './InlineText';
 
 export default function PreviewPane({ source, style }) {
@@ -14,7 +15,7 @@ export default function PreviewPane({ source, style }) {
 
   return (
     <View style={style}>
-      <Text style={noteScreenStyles.paneLabel}>Preview</Text>
+      <Text style={screenStyles.paneLabel}>Preview</Text>
       <ScrollView style={previewStyles.scroll} contentContainerStyle={previewStyles.content}>
         {blocks.map((block, i) => {
           switch (block.type) {

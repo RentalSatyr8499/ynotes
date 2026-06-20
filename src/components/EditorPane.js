@@ -4,12 +4,13 @@
 
 import React from 'react';
 import { View, Text, TextInput } from 'react-native';
-import { noteScreenStyles, editorStyles } from '../styles/notes';
+import { screenStyles } from '../styles/screen';
+import { editorStyles } from '../styles/editor';
 
 export default function EditorPane({ value, onChangeText, style }) {
   return (
     <View style={style}>
-      <Text style={noteScreenStyles.paneLabel}>Editor</Text>
+      <Text style={screenStyles.paneLabel}>Editor</Text>
       <TextInput
         style={editorStyles.input}
         value={value}

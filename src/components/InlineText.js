@@ -5,8 +5,8 @@
 
 import React, { useMemo } from 'react';
 import { Text } from 'react-native';
-import { parseInline } from '../features/notes/Markdown';
-import { previewStyles } from '../styles/notes';
+import { parseInline } from '../features/notes/markdown';
+import { previewStyles } from '../styles/preview';
 
 export default function InlineText({ text, style }) {
   const spans = useMemo(() => parseInline(text), [text]);
