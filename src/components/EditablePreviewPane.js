@@ -1,46 +1,51 @@
 // src/components/EditablePreviewPane.js
 //
-// The "type directly into the rendered preview" pane. Renders the line
-// list from useLineEditor: committed lines as locked styled output,
-// the one active line as an editable raw-text TextInput.
-//
-// Enter commits the active line and opens a new one below it.
-// Backspace at the very start of an empty active line removes the
-// committed line directly above it (the only supported way to "edit" a
-// rendered line, per product decision — delete and retype, not edit
-// in place).
+// Renders the line list as a mix of editable TextInputs and rendered
+// markdown output. Any line can be focused at any time — tapping a
+// rendered line focuses it; the focused line is always a raw TextInput.
 
 import React, { useEffect, useRef } from 'react';
 import { View, ScrollView, Text } from 'react-native';
 import RenderedLine from './RenderedLine';
 import { screenStyles } from '../styles/screen';
-import { activeLineIndex } from '../features/notes/lineState';
 
 export default function EditablePreviewPane({
   lines,
-  onChangeActiveLineText,
-  onCommitActiveLine,
-  onDeletePrecedingCommittedLine,
+  focusedLineId,
+  onChangeLineText,
+  onEnter,
+  onDeleteEmptyLine,
+  onLineFocus,
   style,
 }) {
-  const activeInputRef = useRef(null);
-  const activeIdx = activeLineIndex(lines);
+  // A map of line id -> TextInput ref, so we can programmatically focus
+  // whichever line needs it after state changes (Enter, delete, tap).
+  const inputRefs = useRef({});
 
-  // Re-focus the active input whenever a new one is created (e.g. right
-  // after committing a line), so typing can continue uninterrupted.
+  // Programmatically focus the right input whenever focusedLineId changes,
+  // and move the caret to the end of that line's text.
   useEffect(() => {
-    activeInputRef.current?.focus?.();
-  }, [activeIdx]);
+    if (!focusedLineId) return;
+    const timer = setTimeout(() => {
+      const ref = inputRefs.current[focusedLineId];
+      if (!ref) return;
+      ref.focus?.();
+      // On web, the ref is a DOM textarea — move caret to end explicitly.
+      if (typeof ref.setSelectionRange === 'function') {
+        const len = ref.value?.length ?? 0;
+        ref.setSelectionRange(len, len);
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [focusedLineId]);
 
-  const handleKeyPress = (e) => {
-    const key = e.nativeEvent.key;
-    const activeLine = lines[activeIdx];
-    if (key === 'Backspace' && activeLine && activeLine.text === '') {
-      // Cursor is in an empty active line with nothing to delete locally —
-      // treat as "delete the committed line above" per spec.
-      onDeletePrecedingCommittedLine();
-    }
-  };
+  // Clean up refs for lines that have been removed.
+  useEffect(() => {
+    const currentIds = new Set(lines.map((l) => l.id));
+    Object.keys(inputRefs.current).forEach((id) => {
+      if (!currentIds.has(id)) delete inputRefs.current[id];
+    });
+  }, [lines]);
 
   return (
     <View style={style}>
@@ -50,15 +55,18 @@ export default function EditablePreviewPane({
         contentContainerStyle={screenStyles.editablePreviewContent}
         keyboardShouldPersistTaps="handled"
       >
-        {lines.map((line, idx) => (
+        {lines.map((line) => (
           <RenderedLine
             key={line.id}
             line={line}
-            isActive={idx === activeIdx}
-            onChangeText={onChangeActiveLineText}
-            onSubmitEditing={onCommitActiveLine}
-            onKeyPress={handleKeyPress}
-            inputRef={idx === activeIdx ? activeInputRef : null}
+            isFocused={line.id === focusedLineId}
+            onChangeText={(text) => onChangeLineText(line.id, text)}
+            onEnter={() => onEnter(line.id)}
+            onDeleteEmptyLine={() => onDeleteEmptyLine(line.id)}
+            onFocus={() => onLineFocus(line.id)}
+            inputRef={(ref) => {
+              if (ref) inputRefs.current[line.id] = ref;
+            }}
           />
         ))}
       </ScrollView>

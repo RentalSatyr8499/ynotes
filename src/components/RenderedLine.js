@@ -1,27 +1,19 @@
 // src/components/RenderedLine.js
 //
 // One row in the editable preview pane.
-//   - If committed: render it through the same block/inline parser used
-//     by the read-only PreviewPane, locked (not editable).
-//   - If active: a plain TextInput showing raw markdown text, editable.
-//
-// Deliberately reuses parseBlocks/parseInline rather than re-implementing
-// rendering logic, so the two preview surfaces (read-only PreviewPane and
-// this editable one) can never visually drift apart.
+//   - isFocused=true  → editable raw-text TextInput (auto-sized, no scroll)
+//   - isFocused=false → rendered markdown output, wrapped in Pressable so
+//                       tapping it focuses it via onFocus callback
 
-import React from 'react';
-import { View, Text, TextInput } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, Pressable } from 'react-native';
 import { parseBlocks } from '../features/notes/markdown';
 import { previewStyles } from '../styles/preview';
 import { editorStyles } from '../styles/editor';
 import InlineText from './InlineText';
 
-// Renders a single committed line's text as a styled block. A line of raw
-// markdown maps to exactly one block from parseBlocks (block parsing is
-// line-based), so we just take the first result.
 function CommittedLine({ text }) {
   const [block] = parseBlocks(text);
-
   if (!block) return null;
 
   switch (block.type) {
@@ -62,29 +54,51 @@ function CommittedLine({ text }) {
 
 export default function RenderedLine({
   line,
-  isActive,
+  isFocused,
   onChangeText,
-  onSubmitEditing,
-  onKeyPress,
+  onEnter,
+  onDeleteEmptyLine,
+  onFocus,
   inputRef,
 }) {
-  if (!isActive) {
-    return <CommittedLine text={line.text} />;
+  const [inputHeight, setInputHeight] = useState(22);
+
+  const handleKeyPress = (e) => {
+    const key = e.nativeEvent.key;
+    if (key === 'Enter') {
+      onEnter();
+      return;
+    }
+    if (key === 'Backspace' && line.text === '') {
+      onDeleteEmptyLine();
+    }
+  };
+
+  if (isFocused) {
+    return (
+      <TextInput
+        ref={inputRef}
+        style={[editorStyles.activeLineInput, { height: inputHeight }]}
+        value={line.text}
+        onChangeText={onChangeText}
+        onKeyPress={handleKeyPress}
+        onFocus={onFocus}
+        onContentSizeChange={(e) =>
+          setInputHeight(e.nativeEvent.contentSize.height)
+        }
+        blurOnSubmit={false}
+        autoCapitalize="none"
+        autoCorrect={false}
+        placeholder="Type markdown, press Enter to render..."
+        multiline={true}
+        scrollEnabled={false}
+      />
+    );
   }
 
   return (
-    <TextInput
-      ref={inputRef}
-      style={editorStyles.activeLineInput}
-      value={line.text}
-      onChangeText={onChangeText}
-      onSubmitEditing={onSubmitEditing}
-      onKeyPress={onKeyPress}
-      blurOnSubmit={false}
-      autoCapitalize="none"
-      autoCorrect={false}
-      placeholder="Type markdown, press Enter to render..."
-      multiline={false}
-    />
+    <Pressable onPress={onFocus}>
+      <CommittedLine text={line.text} />
+    </Pressable>
   );
 }

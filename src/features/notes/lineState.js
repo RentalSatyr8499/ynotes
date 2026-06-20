@@ -1,89 +1,69 @@
 // src/features/notes/lineState.js
 //
-// Manages the right pane's "dual-surface" editing model: the note is split
-// into lines, where each line is either:
-//   - active (committed: false)   -> shown as an editable raw-text TextInput
-//   - committed (committed: true) -> shown as locked, rendered output
+// Pure state-machine functions for the editable preview pane's line list.
+// Every line is { id, text } — no committed/active flag. Focus is tracked
+// separately in React state (focusedLineId) so any line can be edited at
+// any time just by tapping it.
 //
-// Exactly one line is active at a time: the "current" line being typed.
-// Pressing Enter commits the current line and opens a new active line
-// after it. There is no un-commit step (matches product decision: once
-// rendered, a line can only be removed and retyped, not edited in place).
-//
-// This file deliberately has no React/RN imports so the state machine can
-// be unit tested on its own.
-
-// A "Line" is { id, text, committed }. ids are stable so React keys don't
-// thrash as lines are added/removed.
+// No React/RN imports — this file is unit-testable in plain Node.
 
 let _nextId = 1;
 function makeId() {
-  return _nextId++;
+  return String(_nextId++);
 }
 
-// Builds the initial line list from a flat note string. Every line except
-// the last is committed (since the last line is, by definition, the one
-// still being actively typed). This matters when seeding from DEFAULT_NOTE
-// or from a note string coming from the plaintext pane.
+// Builds a line list from a flat note string. All lines start unfocused;
+// focus is managed separately as React state.
 export function linesFromText(text) {
   const rawLines = text.split('\n');
-  return rawLines.map((lineText, i) => ({
+  return rawLines.map((lineText) => ({
     id: makeId(),
     text: lineText,
-    committed: i < rawLines.length - 1,
   }));
 }
 
-// Flattens the line list back into a single note string (what the
-// plaintext pane / shared note state actually stores).
+// Flattens the line list back to the canonical note string.
 export function linesToText(lines) {
   return lines.map((l) => l.text).join('\n');
 }
 
-// Finds the index of the active (uncommitted) line. Returns -1 if every
-// line happens to be committed (shouldn't normally happen, but callers
-// should handle it defensively).
-export function activeLineIndex(lines) {
-  return lines.findIndex((l) => !l.committed);
+// Updates the text of one line by id.
+export function updateLineText(lines, id, newText) {
+  return lines.map((l) => (l.id === id ? { ...l, text: newText } : l));
 }
 
-// Updates the text of the currently-active line. No-op if there is no
-// active line.
-export function updateActiveLineText(lines, newText) {
-  const idx = activeLineIndex(lines);
-  if (idx === -1) return lines;
-  const next = lines.slice();
-  next[idx] = { ...next[idx], text: newText };
-  return next;
+// Inserts a new blank line directly after the line with the given id.
+// Returns { nextLines, newId } so the caller can focus the new line.
+export function insertLineAfter(lines, id) {
+  const idx = lines.findIndex((l) => l.id === id);
+  if (idx === -1) return { nextLines: lines, newId: null };
+  const newLine = { id: makeId(), text: '' };
+  const nextLines = [
+    ...lines.slice(0, idx + 1),
+    newLine,
+    ...lines.slice(idx + 1),
+  ];
+  return { nextLines, newId: newLine.id };
 }
 
-// Commits the active line (locks it as rendered output) and opens a fresh
-// active line after it. This is what happens on Enter.
-export function commitActiveLine(lines) {
-  const idx = activeLineIndex(lines);
-  if (idx === -1) return lines;
-  const next = lines.slice();
-  next[idx] = { ...next[idx], committed: true };
-  next.splice(idx + 1, 0, { id: makeId(), text: '', committed: false });
-  return next;
-}
-
-// Removes a committed line entirely (the "delete and retype" affordance).
-// Used e.g. when the user backspaces at the very start of the active line
-// and there's a committed line above it to remove.
-export function removeLine(lines, id) {
-  return lines.filter((l) => l.id !== id);
-}
-
-// Ensures there is always exactly one active line at the end. Useful as a
-// safety net after removeLine, in case the removed line was the only one
-// and we need to guarantee an editable line exists.
-export function ensureActiveLine(lines) {
-  if (lines.length === 0) {
-    return [{ id: makeId(), text: '', committed: false }];
+// Deletes the line with the given id. Returns { nextLines, focusId } where
+// focusId is the id of the line that should receive focus after deletion
+// (the preceding line, or the next one if there is no preceding line).
+export function deleteLine(lines, id) {
+  const idx = lines.findIndex((l) => l.id === id);
+  if (idx === -1) return { nextLines: lines, focusId: null };
+  const nextLines = lines.filter((l) => l.id !== id);
+  if (nextLines.length === 0) {
+    // Always keep at least one line
+    const fallback = { id: makeId(), text: '' };
+    return { nextLines: [fallback], focusId: fallback.id };
   }
-  if (activeLineIndex(lines) === -1) {
-    return [...lines, { id: makeId(), text: '', committed: false }];
-  }
-  return lines;
+  const focusIdx = Math.max(0, idx - 1);
+  return { nextLines, focusId: nextLines[focusIdx].id };
+}
+
+// Ensures the line list is never empty (safety net).
+export function ensureOneLine(lines) {
+  if (lines.length > 0) return lines;
+  return [{ id: makeId(), text: '' }];
 }

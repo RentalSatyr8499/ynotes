@@ -21,12 +21,11 @@ export const editorStyles = StyleSheet.create({
   // Single-line raw TextInput shown for the active (uncommitted) line
   // in the editable preview pane (right pane)
   activeLineInput: {
-    fontFamily: MONO,
     fontSize: 15,
     lineHeight: 22,
     color: colors.textBody,
     padding: 0,
     margin: 0,
-    outlineWidth: 0,  // web only: removes browser focus ring
+    outlineWidth: 0,
   },
 });

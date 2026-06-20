@@ -1,36 +1,39 @@
 // src/hooks/useLineEditor.js
 //
-// Bridges the line-commit state machine (features/notes/lineState.js) with
-// React state, and keeps it in sync with the shared flat note string used
-// by the plaintext pane (via useNote).
+// Manages the editable preview pane's line list and focus state.
 //
-// Sync direction: this hook is the source of truth while the user is
-// actively editing in the rendered pane. Every change calls back up to
-// `onChangeNoteText` so the plaintext pane mirrors it live. If the note
-// text changes from *outside* this hook (e.g. user typed in the plaintext
-// pane instead), `syncFromExternalText` re-derives the line list so the
-// rendered pane catches up.
+// Key design decisions:
+//   - `focusedLineId` is explicit React state (not derived from the line
+//     list), so any line can be focused at any time by tapping it.
+//   - All mutations target lines by id, so stable ids mean React doesn't
+//     re-key/re-mount unrelated TextInputs on every keystroke.
+//   - `lastEmittedText` ref prevents the external-sync useEffect in
+//     index.js from rebuilding lines when the note change originated here.
 
 import { useCallback, useRef, useState } from 'react';
 import {
   linesFromText,
   linesToText,
-  updateActiveLineText,
-  commitActiveLine,
-  removeLine,
-  ensureActiveLine,
-  activeLineIndex,
+  updateLineText,
+  insertLineAfter,
+  deleteLine,
+  ensureOneLine,
 } from '../features/notes/lineState';
 
 export default function useLineEditor(initialText, onChangeNoteText) {
   const [lines, setLines] = useState(() => linesFromText(initialText));
+  const [focusedLineId, setFocusedLineId] = useState(
+    () => {
+      const initial = linesFromText(initialText);
+      // Start focused on the last line, matching the old behaviour of
+      // the active line always being at the bottom on first load.
+      return initial[initial.length - 1]?.id ?? null;
+    }
+  );
 
-  // Tracks the last text *this hook* produced, so we can tell the
-  // difference between "the plaintext pane changed the note" (need to
-  // re-derive lines) vs. "we changed it ourselves" (no-op, avoids
-  // clobbering in-progress edits / re-keying lines unnecessarily).
-  const lastEmittedText = useRef(linesToText(lines));
+  const lastEmittedText = useRef(linesToText(linesFromText(initialText)));
 
+  // Emits a new line list: updates React state, syncs note text upward.
   const emit = useCallback(
     (nextLines) => {
       setLines(nextLines);
@@ -41,45 +44,60 @@ export default function useLineEditor(initialText, onChangeNoteText) {
     [onChangeNoteText]
   );
 
-  const onChangeActiveLineText = useCallback(
-    (text) => {
-      emit(updateActiveLineText(lines, text));
+  // Called by RenderedLine's onChangeText for the focused input.
+  const onChangeLineText = useCallback(
+    (id, text) => {
+      // Strip newlines — Enter is handled separately via onKeyPress.
+      emit(updateLineText(lines, id, text.replace(/\n/g, '')));
     },
     [lines, emit]
   );
 
-  const onCommitActiveLine = useCallback(() => {
-    emit(commitActiveLine(lines));
-  }, [lines, emit]);
+  // Called on Enter: insert a blank line after the current one and focus it.
+  const onEnter = useCallback(
+    (id) => {
+      const { nextLines, newId } = insertLineAfter(lines, id);
+      emit(nextLines);
+      setFocusedLineId(newId);
+    },
+    [lines, emit]
+  );
 
-  // Backspace at the very start of the active line, when there's a
-  // committed line directly above: removes that committed line (the
-  // "delete and retype" affordance), per product decision that committed
-  // lines can't be edited in place.
-  const onDeletePrecedingCommittedLine = useCallback(() => {
-    const idx = activeLineIndex(lines);
-    if (idx <= 0) return; // no committed line above to delete
-    const precedingLine = lines[idx - 1];
-    if (!precedingLine.committed) return;
-    emit(ensureActiveLine(removeLine(lines, precedingLine.id)));
-  }, [lines, emit]);
+  // Called on Backspace when the focused line is empty: delete it and focus
+  // the preceding line (standard document-editor behaviour).
+  const onDeleteEmptyLine = useCallback(
+    (id) => {
+      const { nextLines, focusId } = deleteLine(lines, id);
+      emit(ensureOneLine(nextLines));
+      setFocusedLineId(focusId);
+    },
+    [lines, emit]
+  );
 
-  // Call this when the note text changed from outside this hook (e.g. the
-  // plaintext pane). Re-derives the line list from scratch. Cheap and
-  // simple; fine for note sizes a single-pane editor will realistically
-  // see. Skips the rebuild if the incoming text matches what we last
-  // emitted ourselves, since that's just our own change echoing back.
+  // Called when a line's TextInput gains focus (tap or programmatic).
+  const onLineFocus = useCallback((id) => {
+    setFocusedLineId(id);
+  }, []);
+
+  // Re-derives line list from external text change (e.g. left pane edit).
+  // Skips if the text matches what we last emitted ourselves.
   const syncFromExternalText = useCallback((text) => {
     if (text === lastEmittedText.current) return;
     lastEmittedText.current = text;
-    setLines(linesFromText(text));
+    const nextLines = linesFromText(text);
+    setLines(nextLines);
+    // Keep focus on the last line after an external sync, since we have
+    // no way to know which line the user was editing in the left pane.
+    setFocusedLineId(nextLines[nextLines.length - 1]?.id ?? null);
   }, []);
 
   return {
     lines,
-    onChangeActiveLineText,
-    onCommitActiveLine,
-    onDeletePrecedingCommittedLine,
+    focusedLineId,
+    onChangeLineText,
+    onEnter,
+    onDeleteEmptyLine,
+    onLineFocus,
     syncFromExternalText,
   };
 }
