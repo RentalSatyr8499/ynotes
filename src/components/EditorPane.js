@@ -12,6 +12,7 @@ export default function EditorPane({ value, onChangeText, style }) {
     <View style={style}>
       <Text style={screenStyles.paneLabel}>Editor</Text>
       <TextInput
+        nativeID="editor-input"
         style={editorStyles.input}
         value={value}
         onChangeText={onChangeText}

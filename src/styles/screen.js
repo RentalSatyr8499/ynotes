@@ -1,8 +1,4 @@
 // src/styles/screen.js
-//
-// Layout styles for the top-level split-pane screen: the outer container,
-// pane splitting (side-by-side vs. stacked), pane labels, and the scroll
-// containers used by the editable preview pane.
 
 import { StyleSheet } from 'react-native';
 import { colors } from './tokens';
@@ -10,8 +6,11 @@ import { colors } from './tokens';
 export const screenStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.editorBg,
+    backgroundColor: colors.pageBg,
   },
+  // Outer row/column that holds both panes. The 10% horizontal margin
+  // is applied dynamically in index.js via useWindowDimensions since
+  // StyleSheet doesn't support screen-relative values.
   panes: {
     flex: 1,
     flexDirection: 'row',
@@ -19,12 +18,14 @@ export const screenStyles = StyleSheet.create({
   panesStacked: {
     flexDirection: 'column',
   },
+  // Each pane fills its half of the inner (80%-wide) area.
   pane: {
     flex: 1,
   },
   paneLeft: {
-    borderRightWidth: 1,
-    borderRightColor: colors.divider,
+    backgroundColor: colors.editorBg,
+    borderRadius: 0,
+    // no border, no outline — square corners, flat
   },
   paneRight: {
     backgroundColor: colors.previewBg,

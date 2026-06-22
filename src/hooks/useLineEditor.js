@@ -79,6 +79,20 @@ export default function useLineEditor(initialText, onChangeNoteText) {
     setFocusedLineId(id);
   }, []);
 
+  // Navigate to the previous line, if one exists.
+  const onArrowUp = useCallback((id) => {
+    const idx = lines.findIndex((l) => l.id === id);
+    if (idx <= 0) return;
+    setFocusedLineId(lines[idx - 1].id);
+  }, [lines]);
+
+  // Navigate to the next line, if one exists.
+  const onArrowDown = useCallback((id) => {
+    const idx = lines.findIndex((l) => l.id === id);
+    if (idx === -1 || idx >= lines.length - 1) return;
+    setFocusedLineId(lines[idx + 1].id);
+  }, [lines]);
+
   // Re-derives line list from external text change (e.g. left pane edit).
   // Skips if the text matches what we last emitted ourselves.
   const syncFromExternalText = useCallback((text) => {
@@ -98,6 +112,8 @@ export default function useLineEditor(initialText, onChangeNoteText) {
     onEnter,
     onDeleteEmptyLine,
     onLineFocus,
+    onArrowUp,
+    onArrowDown,
     syncFromExternalText,
   };
 }

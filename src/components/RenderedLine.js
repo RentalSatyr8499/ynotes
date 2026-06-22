@@ -59,6 +59,8 @@ export default function RenderedLine({
   onEnter,
   onDeleteEmptyLine,
   onFocus,
+  onArrowUp,
+  onArrowDown,
   inputRef,
 }) {
   const [inputHeight, setInputHeight] = useState(22);
@@ -71,6 +73,14 @@ export default function RenderedLine({
     }
     if (key === 'Backspace' && line.text === '') {
       onDeleteEmptyLine();
+      return;
+    }
+    if (key === 'ArrowUp') {
+      onArrowUp?.();
+      return;
+    }
+    if (key === 'ArrowDown') {
+      onArrowDown?.();
     }
   };
 
@@ -89,7 +99,6 @@ export default function RenderedLine({
         blurOnSubmit={false}
         autoCapitalize="none"
         autoCorrect={false}
-        placeholder="Type markdown, press Enter to render..."
         multiline={true}
         scrollEnabled={false}
       />

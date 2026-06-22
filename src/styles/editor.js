@@ -16,6 +16,7 @@ export const editorStyles = StyleSheet.create({
     lineHeight: 20,
     padding: 16,
     paddingTop: 4,
+    outlineWidth: 0,
   },
 
   // Single-line raw TextInput shown for the active (uncommitted) line

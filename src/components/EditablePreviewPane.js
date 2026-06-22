@@ -16,6 +16,8 @@ export default function EditablePreviewPane({
   onEnter,
   onDeleteEmptyLine,
   onLineFocus,
+  onArrowUp,
+  onArrowDown,
   style,
 }) {
   // A map of line id -> TextInput ref, so we can programmatically focus
@@ -64,6 +66,8 @@ export default function EditablePreviewPane({
             onEnter={() => onEnter(line.id)}
             onDeleteEmptyLine={() => onDeleteEmptyLine(line.id)}
             onFocus={() => onLineFocus(line.id)}
+            onArrowUp={() => onArrowUp(line.id)}
+            onArrowDown={() => onArrowDown(line.id)}
             inputRef={(ref) => {
               if (ref) inputRefs.current[line.id] = ref;
             }}
