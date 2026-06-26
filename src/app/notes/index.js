@@ -6,6 +6,8 @@ import {
 } from 'react-native';
 import useNotes from '../../hooks/useNotes';
 import { useNotesBrowserStyles } from '../../styles/notesBrowser';
+import CollapsibleChildren from '../../components/CollapsibleChildren';
+import Sidebar from '../../components/Sidebar';
 
 const FOLDER_ICON = require('../../assets/icons/folder.png');
 const FILE_ICON   = require('../../assets/icons/file.png');
@@ -45,18 +47,19 @@ function ItemList({ items, openPaths, onToggleFolder, onPressNote, depth = 0, st
       />
     );
 
-    if (item.type === 'folder' && isOpen) {
+    if (item.type === 'folder') {
       const children = parseLevel(item.subtree);
       rows.push(
-        <ItemList
-          key={`${path}-children`}
-          items={children}
-          openPaths={openPaths}
-          onToggleFolder={onToggleFolder}
-          onPressNote={onPressNote}
-          depth={depth + 1}
-          styles={styles}
-        />
+        <CollapsibleChildren key={`${path}-children`} isOpen={isOpen}>
+          <ItemList
+            items={children}
+            openPaths={openPaths}
+            onToggleFolder={onToggleFolder}
+            onPressNote={onPressNote}
+            depth={depth + 1}
+            styles={styles}
+          />
+        </CollapsibleChildren>
       );
     }
   }
@@ -65,13 +68,25 @@ function ItemList({ items, openPaths, onToggleFolder, onPressNote, depth = 0, st
 }
 
 function Row({ item, depth, isOpen, onPress, styles }) {
+  const [hovered, setHovered] = useState(false);
   const icon = item.type === 'folder' ? FOLDER_ICON : FILE_ICON;
   const indent = depth * styles.indentSize;
+  const iconOpaque = isOpen || hovered;
 
   return (
-    <Pressable style={[styles.row, { paddingLeft: indent }]} onPress={onPress}>
+    <Pressable
+      style={[styles.row, { paddingLeft: indent }]}
+      onPress={onPress}
+      onHoverIn={() => setHovered(true)}
+      onHoverOut={() => setHovered(false)}
+      onPressIn={() => setHovered(true)}
+      onPressOut={() => setHovered(false)}
+    >
       <View style={styles.rowLeft}>
-        <Image source={icon} style={styles.rowIcon} />
+        <Image
+          source={icon}
+          style={[styles.rowIcon, iconOpaque && styles.rowIconActive]}
+        />
         <Text style={styles.rowTitle}>{item.name}</Text>
       </View>
       {item.type === 'folder' && (
@@ -106,6 +121,8 @@ export default function NotesBrowser() {
   const styles = useNotesBrowserStyles();
   const [openPaths, setOpenPaths] = useState(new Set());
 
+  // LayoutAnimation handles native; on web we inject a CSS transition
+  // since LayoutAnimation is a no-op there.
   const handleToggleFolder = (path) => {
     setOpenPaths((prev) => {
       const next = new Set(prev);
@@ -120,49 +137,52 @@ export default function NotesBrowser() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.heading}>Your Notes</Text>
-        <Pressable style={styles.refreshButton} onPress={refresh}>
-          <Text style={styles.refreshText}>Refresh</Text>
-        </Pressable>
-      </View>
-
-      {loading && (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color="#bbb" />
-        </View>
-      )}
-
-      {error && (
-        <View style={styles.centered}>
-          <Text style={styles.errorText}>{error}</Text>
+    <View style={styles.screen}>
+      <Sidebar />
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.heading}>Your Notes</Text>
           <Pressable style={styles.refreshButton} onPress={refresh}>
-            <Text style={styles.refreshText}>Try again</Text>
+            <Text style={styles.refreshText}>Refresh</Text>
           </Pressable>
         </View>
-      )}
 
-      {notes && !loading && (
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <Section
-            label="Owned"
-            tree={notes.owned_notes}
-            openPaths={openPaths}
-            onToggleFolder={handleToggleFolder}
-            onPressNote={handlePressNote}
-            styles={styles}
-          />
-          <Section
-            label="Shared"
-            tree={notes.shared_notes}
-            openPaths={openPaths}
-            onToggleFolder={handleToggleFolder}
-            onPressNote={handlePressNote}
-            styles={styles}
-          />
-        </ScrollView>
-      )}
+        {loading && (
+          <View style={styles.centered}>
+            <ActivityIndicator size="large" color="#bbb" />
+          </View>
+        )}
+
+        {error && (
+          <View style={styles.centered}>
+            <Text style={styles.errorText}>{error}</Text>
+            <Pressable style={styles.refreshButton} onPress={refresh}>
+              <Text style={styles.refreshText}>Try again</Text>
+            </Pressable>
+          </View>
+        )}
+
+        {notes && !loading && (
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <Section
+              label="Owned"
+              tree={notes.owned_notes}
+              openPaths={openPaths}
+              onToggleFolder={handleToggleFolder}
+              onPressNote={handlePressNote}
+              styles={styles}
+            />
+            <Section
+              label="Shared"
+              tree={notes.shared_notes}
+              openPaths={openPaths}
+              onToggleFolder={handleToggleFolder}
+              onPressNote={handlePressNote}
+              styles={styles}
+            />
+          </ScrollView>
+        )}
+      </View>
     </View>
   );
 }

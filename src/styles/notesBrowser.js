@@ -10,6 +10,11 @@ export function useNotesBrowserStyles() {
   const headingSize = Math.max(width * 0.06, 32);
 
   const styles = StyleSheet.create({
+    screen: {
+      flex: 1,
+      flexDirection: 'row',
+      backgroundColor: '#ffffff',
+    },
     container: {
       flex: 1,
       backgroundColor: '#ffffff',
@@ -24,7 +29,7 @@ export function useNotesBrowserStyles() {
     },
     heading: {
       fontSize: headingSize,
-      fontWeight: '700',
+      fontWeight: '200',
       color: '#111',
       lineHeight: headingSize * 1.1,
     },
@@ -73,7 +78,10 @@ export function useNotesBrowserStyles() {
       width: 18,
       height: 18,
       resizeMode: 'contain',
-      opacity: 0.4,
+      opacity: 0.25,
+    },
+    rowIconActive: {
+      opacity: 1,
     },
     rowTitle: {
       fontSize: 16,

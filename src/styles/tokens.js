@@ -2,6 +2,7 @@
 
 import { Platform } from 'react-native';
 
+export const APP_NAME = "yeeva's notes";
 export const MONO = Platform.select({
   ios: 'Menlo',
   android: 'monospace',
