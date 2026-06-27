@@ -3,10 +3,13 @@
   "dependencies": {
     "@expo/metro-runtime": "~56.0.15",
     "expo": "^56.0.12",
+    "expo-auth-session": "~56.0.14",
     "expo-constants": "~56.0.18",
+    "expo-crypto": "~56.0.4",
     "expo-linking": "~56.0.14",
     "expo-router": "~56.2.11",
     "expo-status-bar": "~56.0.4",
+    "expo-web-browser": "~56.0.5",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-native-reanimated": "4.3.1",
@@ -16,5 +19,23 @@
   },
   "devDependencies": {
     "babel-plugin-react-native-web": "^0.21.2"
-  }
+  },
+  "name": "animated-palm-tree",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RentalSatyr8499/animated-palm-tree.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/RentalSatyr8499/animated-palm-tree/issues"
+  },
+  "homepage": "https://github.com/RentalSatyr8499/animated-palm-tree#readme"
 }
