@@ -9,13 +9,14 @@ import useNotes from '../../hooks/useNotes';
 import { useNotesBrowserStyles } from '../../styles/notesBrowser';
 import Sidebar from '../../components/Sidebar';
 import { NotesTree } from '../../components/NotesTree';
+import useDriveSync from '../../hooks/useDriveSync'; // <-- add
 
 export default function NotesBrowser() {
   const { notes, loading, error, refresh } = useNotes();
+  const { writeHelloWorld, isSyncing, error: syncError, result } = useDriveSync(); // <-- add
   const styles = useNotesBrowserStyles();
 
   const handlePressNote = (item) => {
-    // TODO: router.push(`/editor/${encodeURIComponent(item.url)}`);
     console.log('Open note:', item);
   };
 
@@ -28,6 +29,20 @@ export default function NotesBrowser() {
           <Pressable style={styles.refreshButton} onPress={refresh}>
             <Text style={styles.refreshText}>Refresh</Text>
           </Pressable>
+
+          {/* --- Drive hello world test --- */}
+          <Pressable
+            style={[styles.refreshButton, isSyncing && { opacity: 0.5 }]}
+            onPress={writeHelloWorld}
+            disabled={isSyncing}
+          >
+            <Text style={styles.refreshText}>
+              {isSyncing ? 'Writing...' : 'Test Drive Write'}
+            </Text>
+          </Pressable>
+          {syncError && <Text style={styles.errorText}>{syncError}</Text>}
+          {result && <Text style={styles.refreshText}>✓ Created: {result.name}</Text>}
+          {/* --- end test --- */}
         </View>
 
         {loading && (

@@ -10,24 +10,29 @@ const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [accessToken, setAccessToken] = useState(null); // <-- add this
   const [loading, setLoading] = useState(false);
   const { request, response, promptAsync } = useGoogleAuth();
 
   useEffect(() => {
     if (response?.type === 'success') {
-      const accessToken = response.authentication.accessToken;
+      const token = response.authentication.accessToken;
+      setAccessToken(token); // <-- save it
       setLoading(true);
-      fetchGoogleProfile(accessToken)
+      fetchGoogleProfile(token)
         .then(setUser)
         .finally(() => setLoading(false));
     }
   }, [response]);
 
   const login = () => promptAsync();
-  const logout = () => setUser(null);
+  const logout = () => {
+    setUser(null);
+    setAccessToken(null); // <-- clear on logout
+  };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, request }}>
+    <AuthContext.Provider value={{ user, accessToken, loading, login, logout, request }}>
       {children}
     </AuthContext.Provider>
   );

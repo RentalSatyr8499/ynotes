@@ -13,7 +13,11 @@ const CLIENT_ID = process.env.EXPO_PUBLIC_CLIENT_ID;
 export function useGoogleAuth() {
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: CLIENT_ID,
-    scopes: ['profile', 'email'],
+    scopes: [
+      'profile',
+      'email',
+      'https://www.googleapis.com/auth/drive.file', // create + edit app-created files
+    ],
   });
 
   return { request, response, promptAsync };
@@ -23,5 +27,5 @@ export async function fetchGoogleProfile(accessToken) {
   const res = await fetch('https://www.googleapis.com/userinfo/v2/me', {
     headers: { Authorization: `Bearer ${accessToken}` },
   });
-  return res.json(); // { id, email, name, picture, ... }
+  return res.json();
 }
