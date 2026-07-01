@@ -13,6 +13,7 @@ const CLIENT_ID = process.env.EXPO_PUBLIC_CLIENT_ID;
 export function useGoogleAuth() {
   const [request, response, promptAsync] = Google.useAuthRequest({
     clientId: CLIENT_ID,
+    scopes: ['profile', 'email'],
   });
 
   return { request, response, promptAsync };
