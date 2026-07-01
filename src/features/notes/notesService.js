@@ -13,20 +13,12 @@ const STUB_NOTES = {
           'OKRs': 'https://drive.google.com/file/okrs',
           'Roadmap': 'https://drive.google.com/file/roadmap',
         },
+        
       },
-      '.': {
-        'Meeting Notes': 'https://drive.google.com/file/meetings',
-      },
-    },
-    'Personal': {
-      '.': {
-        'Journal': 'https://drive.google.com/file/journal',
-        'Reading List': 'https://drive.google.com/file/reading',
-      },
-    },
-    '.': {
-      'Scratch Pad': 'https://drive.google.com/file/scratch',
-    },
+      'hi': {
+        '.': {}
+      }
+    }
   },
   shared_notes: {
     'Team Docs': {

@@ -1,5 +1,14 @@
 // src/components/CollapsibleChildren.js
-import React, { useState, useEffect } from 'react';
+//
+// Wraps any children in a height + opacity animation that transitions
+// smoothly between collapsed (height 0, invisible) and expanded (natural
+// height, fully visible) whenever `isOpen` changes.
+//
+// The hidden clone stays mounted permanently so that onLayout fires
+// whenever the natural height changes (e.g. nested CollapsibleChildren
+// opening/closing), keeping naturalHeight always current.
+
+import React from 'react';
 import { View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -11,13 +20,8 @@ import Animated, {
 const DURATION = 220;
 const EASING = Easing.inOut(Easing.ease);
 
-export default function CollapsibleChildren({ isOpen, children, debugLabel = '' }) {
+export default function CollapsibleChildren({ isOpen, children }) {
   const naturalHeight = useSharedValue(0);
-  const [measured, setMeasured] = useState(false);
-
-  useEffect(() => {
-    console.log(`[CollapsibleChildren${debugLabel ? ` "${debugLabel}"` : ''}] isOpen=${isOpen} measured=${measured} naturalHeight=${naturalHeight.value}`);
-  }, [isOpen, measured]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     height: withTiming(isOpen ? naturalHeight.value : 0, { duration: DURATION, easing: EASING }),
@@ -27,23 +31,17 @@ export default function CollapsibleChildren({ isOpen, children, debugLabel = '' 
 
   const onMeasure = (e) => {
     const h = e.nativeEvent.layout.height;
-    console.log(`[CollapsibleChildren${debugLabel ? ` "${debugLabel}"` : ''}] onMeasure h=${h}`);
-    if (h > 0) {
-      naturalHeight.value = h;
-      setMeasured(true);
-    }
+    if (h > 0) naturalHeight.value = h;
   };
 
   return (
     <>
-      {!measured && (
-        <View
-          style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}
-          onLayout={onMeasure}
-        >
-          {children}
-        </View>
-      )}
+      <View
+        style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}
+        onLayout={onMeasure}
+      >
+        {children}
+      </View>
 
       <Animated.View style={animatedStyle}>
         {children}
