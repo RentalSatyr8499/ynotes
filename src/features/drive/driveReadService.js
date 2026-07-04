@@ -1,0 +1,60 @@
+// src/features/drive/driveReadService.js
+//
+// Read-only calls to Google Drive and Docs REST APIs.
+
+import { DRIVE_API, DOCS_API } from '../../constants.js';
+
+// Searches Google Drive for a doc with an exact name match.
+// Returns the docId string if found, or null if no match.
+// Note: Drive search is eventually consistent — a doc created seconds ago
+// may not appear immediately.
+export async function findDocByName(accessToken, title) {
+  const query = encodeURIComponent(
+    `name = '${title.replace(/'/g, "\\'")}' and mimeType = 'application/vnd.google-apps.document' and trashed = false`
+  );
+  const res = await fetch(`${DRIVE_API}/files?q=${query}&fields=files(id,name)`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) throw new Error(`findDocByName failed: ${res.status} ${await res.text()}`);
+  const { files } = await res.json();
+  return files.length > 0 ? files[0].id : null;
+}
+
+// Searches Google Drive for a folder with an exact name match.
+// Returns the folder id if found, or null if not.
+export async function findFolder(accessToken, name) {
+  const query = encodeURIComponent(
+    `name = '${name.replace(/'/g, "\\'")}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`
+  );
+  const res = await fetch(`${DRIVE_API}/files?q=${query}&fields=files(id,name)`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) throw new Error(`findFolder failed: ${res.status} ${await res.text()}`);
+  const { files } = await res.json();
+  return files.length > 0 ? files[0].id : null;
+}
+
+// Returns the current length of the doc body in characters (including the
+// trailing newline the Docs API always keeps at the end).
+export async function getDocLength(accessToken, docId) {
+  const res = await fetch(`${DOCS_API}/documents/${docId}?fields=body.content`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) throw new Error(`getDocLength failed: ${res.status} ${await res.text()}`);
+  const doc = await res.json();
+  const content = doc.body.content;
+  return content[content.length - 1].endIndex - 1;
+}
+
+// Fetches the doc body and returns only the content elements that fall
+// within [startIndex, endIndex].
+export async function getDocRange(accessToken, docId, startIndex, endIndex) {
+  const res = await fetch(`${DOCS_API}/documents/${docId}?fields=body.content`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) throw new Error(`getDocRange failed: ${res.status} ${await res.text()}`);
+  const doc = await res.json();
+  return doc.body.content.filter(
+    el => el.startIndex >= startIndex && el.endIndex <= endIndex
+  );
+}

@@ -9,12 +9,16 @@ import useNotes from '../../hooks/useNotes';
 import { useNotesBrowserStyles } from '../../styles/notesBrowser';
 import Sidebar from '../../components/Sidebar';
 import { NotesTree } from '../../components/NotesTree';
-import useDriveSync from '../../hooks/useDriveSync'; // <-- add
+import useTestButton from '../../hooks/useTestButton';
+import { useRequireAuth } from '../../hooks/useRequireAuth'; // <-- add
 
 export default function NotesBrowser() {
+  const { user, loading: authLoading } = useRequireAuth(); // <-- add
   const { notes, loading, error, refresh } = useNotes();
-  const { writeHelloWorld, isSyncing, error: syncError, result } = useDriveSync(); // <-- add
+  const { runTest, isSyncing: inProgress, error: testError, result } = useTestButton();
   const styles = useNotesBrowserStyles();
+
+  if (authLoading || !user) return null; // <-- add
 
   const handlePressNote = (item) => {
     console.log('Open note:', item);
@@ -30,19 +34,19 @@ export default function NotesBrowser() {
             <Text style={styles.refreshText}>Refresh</Text>
           </Pressable>
 
-          {/* --- Drive hello world test --- */}
+          {/* --- Test button --- */}
           <Pressable
-            style={[styles.refreshButton, isSyncing && { opacity: 0.5 }]}
-            onPress={writeHelloWorld}
-            disabled={isSyncing}
+            style={[styles.refreshButton, inProgress && { opacity: 0.5 }]}
+            onPress={runTest}
+            disabled={inProgress}
           >
             <Text style={styles.refreshText}>
-              {isSyncing ? 'Writing...' : 'Test Drive Write'}
+              {inProgress ? 'In progress...' : 'Test button'}
             </Text>
           </Pressable>
-          {syncError && <Text style={styles.errorText}>{syncError}</Text>}
+          {testError && <Text style={styles.errorText}>{testError}</Text>}
           {result && <Text style={styles.refreshText}>✓ Created: {result.name}</Text>}
-          {/* --- end test --- */}
+          {/* --- Test button --- */}
         </View>
 
         {loading && (
