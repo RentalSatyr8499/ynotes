@@ -10,15 +10,18 @@ import { useNotesBrowserStyles } from '../../styles/notesBrowser';
 import Sidebar from '../../components/Sidebar';
 import { NotesTree } from '../../components/NotesTree';
 import useTestButton from '../../hooks/useTestButton';
-import { useRequireAuth } from '../../hooks/useRequireAuth'; // <-- add
+import { useRequireAuth } from '../../hooks/useRequireAuth'; 
+import { ErrorBoundary } from '../../components/ErrorBoundary';
 
 export default function NotesBrowser() {
-  const { user, loading: authLoading } = useRequireAuth(); // <-- add
-  const { notes, loading, error, refresh } = useNotes();
+  const { user, loading: authLoading } = useRequireAuth(); 
+
+const { notes, loading, error, malformed, setMalformed, refresh } = useNotes();
+
   const { runTest, isSyncing: inProgress, error: testError, result } = useTestButton();
   const styles = useNotesBrowserStyles();
 
-  if (authLoading || !user) return null; // <-- add
+  if (authLoading || !user) return null; 
 
   const handlePressNote = (item) => {
     console.log('Open note:', item);
@@ -64,13 +67,25 @@ export default function NotesBrowser() {
           </View>
         )}
 
+      
+        {malformed && (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 16 }}>
+            <Text style={{ color: 'red', fontSize: 12 }}>Your manifest is malformed.</Text>
+          </View>
+        )}
+
         {notes && !loading && (
+        <ErrorBoundary onReset={refresh}>
           <NotesTree
             notes={notes}
             styles={styles}
             onPressNote={handlePressNote}
             onRefresh={refresh}
+            onMalformed={() => {
+              setMalformed(true); // manifest is malformed
+            }}
           />
+        </ErrorBoundary>
         )}
       </View>
     </View>

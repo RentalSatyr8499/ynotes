@@ -1,15 +1,6 @@
-// src/components/NotesList.js
-//
-// Recursive list of notes/folders for one level of the tree.
-// Renders a NotesRow per item, with a CollapsibleChildren wrapper
-// for open folders.
+import { buildPath } from "../features/fileBrowser/tree";
 
-import React from 'react';
-import CollapsibleChildren from './CollapsibleChildren';
-import { NotesRow } from './NotesRow';
-import { parseLevel, buildPath } from '../features/fileBrowser/tree';
-
-export function NotesList({ items, openPaths, onToggleFolder, onPressNote, depth = 0, styles, parentPath = '' }) {
+export function NotesList({ items, openPaths, onToggleFolder, onPressNote, depth = 0, styles, parentPath = '', onMalformed }) {
   const rows = [];
 
   for (const item of items) {
@@ -17,21 +8,14 @@ export function NotesList({ items, openPaths, onToggleFolder, onPressNote, depth
     const isOpen = !!openPaths[path];
 
     rows.push(
-      <NotesRow
-        key={path}
-        item={item}
-        depth={depth}
-        isOpen={isOpen}
-        onPress={() => {
-          if (item.type === 'folder') onToggleFolder(path);
-          else onPressNote(item);
-        }}
+      <NotesRow key={path} item={item} depth={depth} isOpen={isOpen}
+        onPress={() => item.type === 'folder' ? onToggleFolder(path) : onPressNote(item)}
         styles={styles}
       />
     );
 
     if (item.type === 'folder') {
-      const children = parseLevel(item.subtree);
+      const children = parseLevel(item.subtree, onMalformed);
       rows.push(
         <CollapsibleChildren key={`${path}-children`} isOpen={isOpen} debugLabel={path}>
           <NotesList
@@ -42,6 +26,7 @@ export function NotesList({ items, openPaths, onToggleFolder, onPressNote, depth
             depth={depth + 1}
             parentPath={path}
             styles={styles}
+            onMalformed={onMalformed}
           />
         </CollapsibleChildren>
       );

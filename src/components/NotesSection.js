@@ -8,8 +8,8 @@ import { View, Text } from 'react-native';
 import { NotesList } from './NotesList';
 import { parseLevel } from '../features/fileBrowser/tree';
 
-export function NotesSection({ label, tree, openPaths, onToggleFolder, onPressNote, styles }) {
-  const items = parseLevel(tree);
+export function NotesSection({ label, tree, openPaths, onToggleFolder, onPressNote, styles, onMalformed }) {
+  const items = parseLevel(tree, onMalformed);
 
   return (
     <View>
@@ -24,6 +24,7 @@ export function NotesSection({ label, tree, openPaths, onToggleFolder, onPressNo
           onPressNote={onPressNote}
           depth={0}
           styles={styles}
+          onMalformed={onMalformed}
         />
       )}
     </View>

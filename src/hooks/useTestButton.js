@@ -15,7 +15,6 @@ export default function useTestButton() {
 
   async function test1() {
     const fileTree = await getFileTree(accessToken);
-    console.log('file tree:', JSON.stringify(fileTree, null, 2));
   }
 
   async function test2() {
@@ -24,6 +23,10 @@ export default function useTestButton() {
     const length = await getDocLength(accessToken, docId);
     console.log('manifest last character index:', length);
   }
+
+  async function test3() {
+    console.log(JSON.stringify("\{owned_notes: \{\"Work\": \{\"Q3 Planning\": \{\".\": \{\}\"OKRs\": \"https://drive.google.com/file/okrs\",\"Roadmap\": \"https://drive.google.com/file/roadmap\",\"hi\": \{\".\": \{\}\},\"shared_notes\": \{ \"Team Docs\": \{\".\": \{ \"Onboarding\": \"https://drive.google.com/file/onboarding\", \"Style Guide\": \"https://drive.google.com/file/style\" \} \}\}"));
+    }
 
   async function runTest() {
     if (!accessToken) { setError('No access token — are you logged in?'); return; }

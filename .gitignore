@@ -1,3 +1,4 @@
+.gitignore
 .expo
 .env
 node_modules

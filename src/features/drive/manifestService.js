@@ -29,8 +29,13 @@ export async function getJSON(accessToken, docId) {
     .map(el => el.textRun?.content ?? '')
     .join('');
 
-  console.log('getJSON raw string:', raw); // <-- add this
-  return JSON.parse(raw);
+  const parsed = JSON.parse(raw);
+
+  if (!parsed.owned_notes || !parsed.shared_notes) {
+    throw new Error('Manifest JSON is missing owned_notes or shared_notes — check the manifest structure');
+  }
+
+  return parsed;
 }
 
 // Returns the file tree JSON from ynotes_manifest.
@@ -52,5 +57,7 @@ export async function getFileTree(accessToken) {
     await writeRequestsToDoc(accessToken, docId, manifestTemplate.requests);
   }
 
-  return getJSON(accessToken, docId);
+  const result = await getJSON(accessToken, docId);
+  console.log(JSON.stringify(result));
+  return result;
 }
