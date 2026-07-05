@@ -74,6 +74,31 @@ export function useNotesBrowserStyles() {
       alignItems: 'center',
       gap: 10,
     },
+    rowRight: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    rowActions: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    rowActionIcon: {
+      width: 14,
+      height: 14,
+      resizeMode: 'contain',
+      opacity: 0.35,
+    },
+    rowActionText: {
+      fontSize: 12,
+      fontWeight: '500',
+      color: '#aaa',
+    },
+    rowActionDivider: {
+      fontSize: 12,
+      color: '#ddd',
+    },
     rowIcon: {
       width: 18,
       height: 18,
@@ -111,7 +136,5 @@ export function useNotesBrowserStyles() {
     },
   });
 
-  // indentSize is used as a plain number (not a style), so it lives
-  // outside the StyleSheet but returned alongside it.
   return { ...styles, indentSize: 24 };
 }

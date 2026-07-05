@@ -4,8 +4,9 @@
 
 import { useState } from 'react';
 import { useAuth } from '../features/auth/authState';
-import { getFileTree, findManifest } from '../features/drive/manifestService';
+import { getFileTree, findManifest, getJSON } from '../features/drive/manifestService';
 import { getDocLength } from '../features/drive/driveReadService';
+import { createFile } from '../features/fileBrowser/addItem';
 
 export default function useTestButton() {
   const { accessToken } = useAuth();
@@ -53,13 +54,44 @@ export default function useTestButton() {
     console.log('test4: response body:', body);
   }
 
+  async function test5() {
+    const filePath = '/test-folder/test-note';
+    console.log('test5: creating file at path:', filePath);
+
+    // 1. snapshot the manifest before
+    const manifestDocId = await findManifest(accessToken);
+    if (!manifestDocId) throw new Error('test5: ynotes_manifest not found');
+    const before = await getJSON(accessToken, manifestDocId);
+    console.log('test5: manifest before:', JSON.stringify(before, null, 2));
+
+    // 2. call createFile
+    const docId = await createFile(accessToken, filePath);
+    console.log('test5: created doc id:', docId);
+
+    // 3. snapshot the manifest after and diff
+    const after = await getJSON(accessToken, manifestDocId);
+    console.log('test5: manifest after:', JSON.stringify(after, null, 2));
+
+    // 4. assert the new entry exists where we expect it
+    const folder = after['test-folder'];
+    if (!folder) throw new Error('test5: "test-folder" node missing from manifest');
+    if (!folder['.']) throw new Error('test5: "test-folder" is missing its "." key');
+    if (folder['.']['test-note'] !== docId) {
+      throw new Error(
+        `test5: expected test-note to be "${docId}", got "${folder['.']['test-note']}"`
+      );
+    }
+
+    console.log('test5: all assertions passed ✓');
+  }
+
   async function runTest() {
     if (!accessToken) { setError('No access token — are you logged in?'); return; }
     setIsSyncing(true);
     setError(null);
     setResult(null);
     try {
-      await test4(); // <-- swap test
+      await test5(); // <-- swap test
       setResult('ok');
     } catch (e) {
       setError(e.message);
