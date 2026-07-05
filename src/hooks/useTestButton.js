@@ -15,7 +15,6 @@ export default function useTestButton() {
 
   async function test1() {
     const fileTree = await getFileTree(accessToken);
-    console.log('file tree:', JSON.stringify(fileTree, null, 2));
   }
 
   async function test2() {
@@ -25,13 +24,42 @@ export default function useTestButton() {
     console.log('manifest last character index:', length);
   }
 
+  async function test3() {
+    console.log(JSON.stringify("\{owned_notes: \{\"Work\": \{\"Q3 Planning\": \{\".\": \{\}\"OKRs\": \"https://drive.google.com/file/okrs\",\"Roadmap\": \"https://drive.google.com/file/roadmap\",\"hi\": \{\".\": \{\}\},\"shared_notes\": \{ \"Team Docs\": \{\".\": \{ \"Onboarding\": \"https://drive.google.com/file/onboarding\", \"Style Guide\": \"https://drive.google.com/file/style\" \} \}\}"));
+    }
+  
+  async function test4() {
+    const title = 'ynotes_manifest';
+
+    // 1. check the query string before encoding
+    const rawQuery = `name = '${title.replace(/'/g, "\\'")}' and mimeType = 'application/vnd.google-apps.document' and trashed = false`;
+    console.log('test4: raw query:', rawQuery);
+
+    // 2. check the encoded query
+    const encodedQuery = encodeURIComponent(rawQuery);
+    console.log('test4: encoded query:', encodedQuery);
+
+    // 3. check the full URL
+    const url = `https://www.googleapis.com/drive/v3/files?q=${encodedQuery}&fields=files(id,name)`;
+    console.log('test4: full url:', url);
+
+    // 4. fire the request and check the response
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    console.log('test4: response status:', res.status);
+
+    const body = await res.text();
+    console.log('test4: response body:', body);
+  }
+
   async function runTest() {
     if (!accessToken) { setError('No access token — are you logged in?'); return; }
     setIsSyncing(true);
     setError(null);
     setResult(null);
     try {
-      await test1(); // <-- swap to test1 or test2
+      await test4(); // <-- swap test
       setResult('ok');
     } catch (e) {
       setError(e.message);

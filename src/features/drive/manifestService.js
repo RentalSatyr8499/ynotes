@@ -10,7 +10,7 @@ import manifestTemplate from '../../assets/manifest_template.json';
 
 const MANIFEST_NAME = 'ynotes_manifest';
 const YNOTES_FOLDER = 'ynotes';
-const MANIFEST_JSON_START = 4615;
+const MANIFEST_JSON_START = 4641;
 
 // Searches the user's Drive for ynotes_manifest.
 // Returns the docId string if found, or null if not.
@@ -29,7 +29,7 @@ export async function getJSON(accessToken, docId) {
     .map(el => el.textRun?.content ?? '')
     .join('');
 
-  console.log('getJSON raw string:', raw); // <-- add this
+  // console.log('getJSON raw string:', raw); // <-- add this
   return JSON.parse(raw);
 }
 
