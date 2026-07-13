@@ -3,13 +3,19 @@
 // Labelled section (e.g. "Owned", "Shared") in the notes tree.
 // Parses the top level of a tree and delegates to NotesList.
 
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text } from 'react-native';
 import { NotesList } from './NotesList';
 import { parseLevel } from '../features/fileBrowser/tree';
 
-export function NotesSection({ label, tree, openPaths, onToggleFolder, onPressNote, styles }) {
+export function NotesSection({ label, sectionRoot, tree, openPaths, onToggleFolder, onPressNote, onAddItem, styles }) {
   const items = parseLevel(tree);
+  const [activeFolder, setActiveFolder] = useState(null);
+
+  function handleToggleFolder(path) {
+    setActiveFolder(path);
+    onToggleFolder(path);
+  }
 
   return (
     <View>
@@ -20,8 +26,11 @@ export function NotesSection({ label, tree, openPaths, onToggleFolder, onPressNo
         <NotesList
           items={items}
           openPaths={openPaths}
-          onToggleFolder={onToggleFolder}
+          onToggleFolder={handleToggleFolder}
           onPressNote={onPressNote}
+          onAddItem={onAddItem}
+          activeFolder={activeFolder}
+          sectionRoot={sectionRoot}
           depth={0}
           styles={styles}
         />

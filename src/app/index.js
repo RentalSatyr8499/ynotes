@@ -25,7 +25,7 @@ export default function LoginScreen() {
       <View style={styles.content}>
         <Image source={LOGO} style={[styles.logo, { height: height * 0.20, width: height * 0.20 }]} />
         <Text style={styles.appName}>{APP_NAME}</Text>
-        <Text style={styles.tagline}>the best note taking app.....EVER!!!!</Text>
+        <Text style={styles.tagline}>the worst note taking app.....ever...</Text>
         <Pressable
           style={[styles.button, (!request || loading) && styles.buttonDisabled]}
           onPress={login}

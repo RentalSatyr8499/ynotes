@@ -43,7 +43,9 @@ export async function getDocLength(accessToken, docId) {
   if (!res.ok) throw new Error(`getDocLength failed: ${res.status} ${await res.text()}`);
   const doc = await res.json();
   const content = doc.body.content;
-  return content[content.length - 1].endIndex - 1;
+  const lastElement = content[content.length - 1];
+  const length = lastElement.endIndex - 1;
+  return length;
 }
 
 // Fetches the doc body and returns only the content elements that fall
@@ -54,7 +56,12 @@ export async function getDocRange(accessToken, docId, startIndex, endIndex) {
   });
   if (!res.ok) throw new Error(`getDocRange failed: ${res.status} ${await res.text()}`);
   const doc = await res.json();
-  return doc.body.content.filter(
-    el => el.startIndex >= startIndex && el.endIndex <= endIndex
+
+  const all = doc.body.content;
+
+  const filtered = all.filter(
+    el => el.endIndex > startIndex && el.startIndex < endIndex + 1
   );
+
+  return filtered;
 }

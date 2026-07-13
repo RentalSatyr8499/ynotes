@@ -9,12 +9,25 @@ import CollapsibleChildren from './CollapsibleChildren';
 import { NotesRow } from './NotesRow';
 import { parseLevel, buildPath } from '../features/fileBrowser/tree';
 
-export function NotesList({ items, openPaths, onToggleFolder, onPressNote, depth = 0, styles, parentPath = '' }) {
+export function NotesList({
+  items,
+  openPaths,
+  onToggleFolder,
+  onPressNote,
+  onAddItem,
+  activeFolder,
+  sectionRoot,
+  depth = 0,
+  styles,
+  parentPath = '',
+}) {
   const rows = [];
 
   for (const item of items) {
-    const path = buildPath(parentPath, item.name);
-    const isOpen = !!openPaths[path];
+    const path         = buildPath(parentPath, item.name);
+    // Full manifest path: e.g. "/owned_notes/work/archive"
+    const manifestPath = `/${sectionRoot}/${path}`;
+    const isOpen       = !!openPaths[path];
 
     rows.push(
       <NotesRow
@@ -22,9 +35,17 @@ export function NotesList({ items, openPaths, onToggleFolder, onPressNote, depth
         item={item}
         depth={depth}
         isOpen={isOpen}
+        isActive={activeFolder === path}
         onPress={() => {
           if (item.type === 'folder') onToggleFolder(path);
           else onPressNote(item);
+        }}
+        onAddItem={(name, type) => {
+          // Folders get a trailing slash; files do not.
+          const itemPath = type === 'folder'
+            ? `${manifestPath}/${name}/`
+            : `${manifestPath}/${name}`;
+          return onAddItem(itemPath);
         }}
         styles={styles}
       />
@@ -39,6 +60,9 @@ export function NotesList({ items, openPaths, onToggleFolder, onPressNote, depth
             openPaths={openPaths}
             onToggleFolder={onToggleFolder}
             onPressNote={onPressNote}
+            onAddItem={onAddItem}
+            activeFolder={activeFolder}
+            sectionRoot={sectionRoot}
             depth={depth + 1}
             parentPath={path}
             styles={styles}

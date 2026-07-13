@@ -84,16 +84,27 @@ export function useNotesBrowserStyles() {
       alignItems: 'center',
       gap: 4,
     },
+    rowActionIconWrap: {
+      padding: 2,
+    },
     rowActionIcon: {
       width: 14,
       height: 14,
       resizeMode: 'contain',
-      opacity: 0.35,
+      opacity: 0.25,
+    },
+    rowActionIconActive: {
+      opacity: 1,
+      tintColor: '#000',
     },
     rowActionText: {
       fontSize: 12,
       fontWeight: '500',
       color: '#aaa',
+    },
+    rowActionTextActive: {
+      color: '#000',
+      textDecorationLine: 'underline',
     },
     rowActionDivider: {
       fontSize: 12,
@@ -133,6 +144,24 @@ export function useNotesBrowserStyles() {
     errorText: {
       fontSize: 15,
       color: '#c0392b',
+    },
+    rowCreateInline: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 6,
+    },
+    rowCreateInput: {
+      borderWidth: 0,
+      borderRadius: 6,
+      paddingHorizontal: 8,
+      paddingVertical: 4,
+      fontSize: 12,           // matches rowActionText
+      fontStyle: 'italic',
+      color: '#1a1a1a',
+      minWidth: 140,
+      backgroundColor: '#fafafa',
+      outlineStyle: 'none',   // removes browser focus ring
+      outlineWidth: 0,        // belt-and-suspenders for RN Web
     },
   });
 

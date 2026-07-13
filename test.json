@@ -19,3 +19,36 @@
         }
     }
 }
+{
+   {
+      "owned_notes":{
+         "Work":{
+            "Q3 Planning":{
+               ".":{
+                  "OKRs":"https://drive.google.com/file/okrs",
+                  "Roadmap":"https://drive.google.com/file/roadmap"
+               },
+               "hi":{
+                  ".":{
+                     
+                  }
+               }
+            }
+         }
+      },
+      "shared_notes":{
+         "Team Docs":{
+            ".":{
+               "Onboarding":"https://drive.google.com/file/onboarding",
+               "Style Guide":"https://drive.google.com/file/style"
+            }
+         }
+      },
+      "test-folder":{
+         ".":{
+            "test-note":"1ETZWFfHJBTkTA5JMx7qDZG9LQB3ML_6wrdgptZW3pl0"
+         }
+      }
+   }
+}
+

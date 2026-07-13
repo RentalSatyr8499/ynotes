@@ -11,7 +11,7 @@ import manifestTemplate from '../../assets/manifest_template.json';
 
 const MANIFEST_NAME = 'ynotes_manifest';
 const YNOTES_FOLDER = 'ynotes';
-const MANIFEST_JSON_START = 4641;
+const MANIFEST_JSON_START = 4643;
 
 // Searches the user's Drive for ynotes_manifest.
 // Returns the docId string if found, or null if not.
@@ -24,6 +24,7 @@ export async function findManifest(accessToken) {
 // it into a JS object.
 export async function getJSON(accessToken, docId) {
   const endIndex = await getDocLength(accessToken, docId);
+
   const elements = await getDocRange(accessToken, docId, MANIFEST_JSON_START, endIndex);
 
   const raw = elements
@@ -37,8 +38,11 @@ export async function getJSON(accessToken, docId) {
 // Writes a JS object back to the manifest doc, replacing everything from
 // MANIFEST_JSON_START to the end of the file.
 async function writeJSON(accessToken, docId, data) {
-  await clearDoc(accessToken, docId, MANIFEST_JSON_START);
-  await writeToDoc(accessToken, docId, JSON.stringify(data), MANIFEST_JSON_START);
+  const serialized = JSON.stringify(data);
+  console.log('[writeJSON] string to write:', serialized);
+
+  await clearDoc(accessToken, docId, MANIFEST_JSON_START-1); // clearing from MANIFEST_JSON_START seems to be off by one
+  await writeToDoc(accessToken, docId, serialized, MANIFEST_JSON_START-1);
 }
 
 // Returns the file tree JSON from ynotes_manifest.
