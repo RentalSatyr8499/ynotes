@@ -6,7 +6,7 @@
 import React, { useState } from 'react';
 import { View, Text } from 'react-native';
 import { NotesList } from './NotesList';
-import { parseLevel } from '../features/fileBrowser/tree';
+import { parseLevel } from '../../features/fileBrowser/tree';
 
 export function NotesSection({ label, sectionRoot, tree, openPaths, onToggleFolder, onPressNote, onAddItem, styles }) {
   const items = parseLevel(tree);

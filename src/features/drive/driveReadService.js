@@ -65,3 +65,33 @@ export async function getDocRange(accessToken, docId, startIndex, endIndex) {
 
   return filtered;
 }
+
+// Fetches a full Google Doc and returns its content as a plain text string.
+// Walks body.content, concatenating textRun.content from every paragraph
+// element. The Docs API terminates the document with a trailing newline
+// which we strip here so the editor doesn't see a phantom empty line.
+export async function readDocAsPlaintext(accessToken, docId) {
+  const res = await fetch(`${DOCS_API}/documents/${docId}?fields=body.content`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  if (!res.ok) throw new Error(`readDocAsPlaintext failed: ${res.status} ${await res.text()}`);
+  const doc = await res.json();
+
+  const text = (doc.body.content ?? [])
+    .flatMap(el => el.paragraph?.elements ?? [])
+    .map(el => el.textRun?.content ?? '')
+    .join('');
+
+  // Strip the single trailing newline the Docs API always appends.
+  return text.endsWith('\n') ? text.slice(0, -1) : text;
+}
+
+// Extracts the Google Drive file ID from a Drive file URL.
+// Handles the common formats:
+//   https://drive.google.com/file/d/{id}/view
+//   https://docs.google.com/document/d/{id}/edit
+export function extractDocId(url) {
+  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (!match) throw new Error(`Could not extract doc ID from URL: ${url}`);
+  return match[1];
+}

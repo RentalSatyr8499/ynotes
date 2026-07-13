@@ -39,7 +39,6 @@ export async function getJSON(accessToken, docId) {
 // MANIFEST_JSON_START to the end of the file.
 async function writeJSON(accessToken, docId, data) {
   const serialized = JSON.stringify(data);
-  console.log('[writeJSON] string to write:', serialized);
 
   await clearDoc(accessToken, docId, MANIFEST_JSON_START-1); // clearing from MANIFEST_JSON_START seems to be off by one
   await writeToDoc(accessToken, docId, serialized, MANIFEST_JSON_START-1);

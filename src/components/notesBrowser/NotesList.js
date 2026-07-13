@@ -1,4 +1,4 @@
-// src/components/NotesList.js
+// src/components/notesBrowser/NotesList.js
 //
 // Recursive list of notes/folders for one level of the tree.
 // Renders a NotesRow per item, with a CollapsibleChildren wrapper
@@ -7,7 +7,7 @@
 import React from 'react';
 import CollapsibleChildren from './CollapsibleChildren';
 import { NotesRow } from './NotesRow';
-import { parseLevel, buildPath } from '../features/fileBrowser/tree';
+import { parseLevel, buildPath } from '../../features/fileBrowser/tree';
 
 export function NotesList({
   items,
@@ -38,10 +38,9 @@ export function NotesList({
         isActive={activeFolder === path}
         onPress={() => {
           if (item.type === 'folder') onToggleFolder(path);
-          else onPressNote(item);
+          else onPressNote(item, manifestPath);
         }}
         onAddItem={(name, type) => {
-          // Folders get a trailing slash; files do not.
           const itemPath = type === 'folder'
             ? `${manifestPath}/${name}/`
             : `${manifestPath}/${name}`;

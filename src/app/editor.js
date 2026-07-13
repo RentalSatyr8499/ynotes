@@ -1,5 +1,7 @@
+// src/app/editor.js
+
 import React, { useCallback, useEffect } from 'react';
-import { View, useWindowDimensions, Platform } from 'react-native';
+import { View, Text, Pressable, useWindowDimensions, Platform } from 'react-native';
 import useNote from '../hooks/useNote';
 import useLineEditor from '../hooks/useLineEditor';
 import EditorPane from '../components/EditorPane';
@@ -19,9 +21,9 @@ function useWebStyles() {
   }, []);
 }
 
-export default function HomeScreen() {
+export default function EditorScreen() {
   useWebStyles();
-  const [note, setNote] = useNote();
+  const [note, setNote, { loading, error }] = useNote();
   const { width, height } = useWindowDimensions();
   const isNarrow = width < 700;
 
@@ -37,11 +39,20 @@ export default function HomeScreen() {
     [setNote]
   );
 
-  // 10% margin on each side means the pane area is 80% of screen width.
-  // On narrow screens we skip the horizontal margin so panes don't get
-  // too cramped when stacked vertically.
   const horizontalMargin = isNarrow ? 0 : width * 0.1;
-  const verticalMargin = height * 0.05;
+  const verticalMargin   = height * 0.05;
+
+  if (loading) return (
+    <View style={[screenStyles.container, screenStyles.centered]}>
+      <Text>Loading…</Text>
+    </View>
+  );
+
+  if (error) return (
+    <View style={[screenStyles.container, screenStyles.centered]}>
+      <Text>Failed to load note: {error}</Text>
+    </View>
+  );
 
   return (
     <View style={screenStyles.container}>
@@ -50,7 +61,7 @@ export default function HomeScreen() {
         isNarrow ? screenStyles.panesStacked : null,
         {
           marginHorizontal: horizontalMargin,
-          marginVertical: verticalMargin,
+          marginVertical:   verticalMargin,
         },
       ]}>
         <EditorPane

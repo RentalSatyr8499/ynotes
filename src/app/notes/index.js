@@ -4,24 +4,36 @@
 // and renders the NotesTree component.
 
 import React from 'react';
-import { View, Text, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
+import LoadingAnimation from '../../components/LoadingAnimation';
 import useNotes from '../../hooks/useNotes';
 import { useNotesBrowserStyles } from '../../styles/notesBrowser';
 import Sidebar from '../../components/Sidebar';
-import { NotesTree } from '../../components/NotesTree';
+import { NotesTree } from '../../components/notesBrowser/NotesTree';
 import useTestButton from '../../hooks/useTestButton';
-import { useRequireAuth } from '../../hooks/useRequireAuth'; // <-- add
+import { useRequireAuth } from '../../hooks/useRequireAuth';
 
 export default function NotesBrowser() {
-  const { user, loading: authLoading } = useRequireAuth(); // <-- add
+  const { user, loading: authLoading } = useRequireAuth();
   const { notes, loading, error, refresh } = useNotes();
   const { runTest, isSyncing: inProgress, error: testError, result } = useTestButton();
   const styles = useNotesBrowserStyles();
+  const router = useRouter();
 
-  if (authLoading || !user) return null; // <-- add
+  if (authLoading || !user) return null;
 
-  const handlePressNote = (item) => {
-    console.log('Open note:', item);
+  // item: { name, type, url }
+  // manifestPath: full path in the manifest JSON, e.g. "/owned_notes/work/my-note"
+  const handlePressNote = (item, manifestPath) => {
+    router.push({
+      pathname: '/editor',
+      params: {
+        url:          item.url,
+        name:         item.name,
+        manifestPath,
+      },
+    });
   };
 
   return (
@@ -51,7 +63,7 @@ export default function NotesBrowser() {
 
         {loading && (
           <View style={styles.centered}>
-            <ActivityIndicator size="large" color="#bbb" />
+            <LoadingAnimation />
           </View>
         )}
 

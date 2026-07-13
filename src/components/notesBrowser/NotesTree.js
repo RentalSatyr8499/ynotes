@@ -5,8 +5,8 @@
 import React from 'react';
 import { ScrollView } from 'react-native';
 import { NotesSection } from './NotesSection';
-import { useFolderState } from '../features/fileBrowser/useFolderState';
-import { useAddItem } from '../hooks/useAddItem';
+import { useFolderState } from '../../features/fileBrowser/useFolderState';
+import { useAddItem } from '../../hooks/useAddItem';
 
 export function NotesTree({ notes, styles, onPressNote, refresh }) {
   const { openPaths, toggleFolder } = useFolderState();

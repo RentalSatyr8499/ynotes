@@ -22,7 +22,6 @@ export default function useNotes() {
     setMalformed(false);
     try {
       const data = await fetchAllNotes(accessToken);
-      console.log(data);
       setNotes(data.data ?? data);;
     } catch (e) {
       setError(e.message ?? 'Failed to load notes.');
