@@ -1,13 +1,13 @@
 // src/styles/editor.js
 //
-// Styles for the plaintext editor pane (left) and the active-line
-// TextInput within the editable preview pane (right).
+// Styles for text input surfaces: the raw markdown TextInput in EditorPane
+// and the active-line TextInput in EditablePreviewPane.
 
 import { StyleSheet } from 'react-native';
 import { MONO, colors } from './tokens';
 
 export const editorStyles = StyleSheet.create({
-  // Full-pane raw markdown TextInput (left pane)
+  // Full-pane raw markdown TextInput (EditorPane)
   input: {
     flex: 1,
     color: colors.editorText,
@@ -19,8 +19,7 @@ export const editorStyles = StyleSheet.create({
     outlineWidth: 0,
   },
 
-  // Single-line raw TextInput shown for the active (uncommitted) line
-  // in the editable preview pane (right pane)
+  // Single-line raw TextInput for the focused line in EditablePreviewPane
   activeLineInput: {
     fontSize: 15,
     lineHeight: 22,

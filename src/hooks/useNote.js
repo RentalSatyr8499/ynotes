@@ -1,9 +1,8 @@
 // src/hooks/useNote.js
 //
-// Owns the note's text state. Reads url and name from navigation params
+// Owns the note's text state. Reads docId and name from navigation params
 // (set by handlePressNote in notes/index.js), fetches the corresponding
-// Google Doc as plaintext, and returns [note, setNote] — the same
-// interface the editor expects.
+// Google Doc as plaintext, and returns [note, setNote, { loading, error }].
 //
 // Local edits via setNote are in-memory only for now. Write-back to
 // Drive will be added here when sync is implemented.
@@ -11,10 +10,10 @@
 import { useState, useEffect } from 'react';
 import { useLocalSearchParams } from 'expo-router';
 import { useAuth } from '../features/auth/authState';
-import { readDocAsPlaintext, extractDocId } from '../features/drive/driveReadService';
+import { readDocAsPlaintext } from '../features/drive/driveReadService';
 
 export default function useNote() {
-  const { url } = useLocalSearchParams();
+  const { url: docId } = useLocalSearchParams();
   const { accessToken } = useAuth();
 
   const [note, setNote]       = useState('');
@@ -22,13 +21,11 @@ export default function useNote() {
   const [error, setError]     = useState(null);
 
   useEffect(() => {
-    if (!url || !accessToken) return;
+    if (!docId || !accessToken) return;
 
     let cancelled = false;
     setLoading(true);
     setError(null);
-
-    const docId = extractDocId(url);
 
     readDocAsPlaintext(accessToken, docId)
       .then(text => { if (!cancelled) setNote(text); })
@@ -36,7 +33,7 @@ export default function useNote() {
       .finally(()  => { if (!cancelled) setLoading(false); });
 
     return () => { cancelled = true; };
-  }, [url, accessToken]);
+  }, [docId, accessToken]);
 
   return [note, setNote, { loading, error }];
 }

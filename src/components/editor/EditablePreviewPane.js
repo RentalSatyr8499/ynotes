@@ -7,7 +7,8 @@
 import React, { useEffect, useRef } from 'react';
 import { View, ScrollView, Text } from 'react-native';
 import RenderedLine from './RenderedLine';
-import { screenStyles } from '../styles/screen';
+import InsertMenu from './InsertMenu';
+import { screenStyles } from '../../styles/screen';
 
 export default function EditablePreviewPane({
   lines,
@@ -18,6 +19,8 @@ export default function EditablePreviewPane({
   onLineFocus,
   onArrowUp,
   onArrowDown,
+  isActive,
+  onInsert,
   style,
 }) {
   // A map of line id -> TextInput ref, so we can programmatically focus
@@ -50,8 +53,9 @@ export default function EditablePreviewPane({
   }, [lines]);
 
   return (
-    <View style={style}>
+    <View style={[style, { position: 'relative' }]}>
       <Text style={screenStyles.paneLabel}>Preview (editable)</Text>
+      <InsertMenu isActive={isActive} onInsert={onInsert} />
       <ScrollView
         style={screenStyles.editablePreviewScroll}
         contentContainerStyle={screenStyles.editablePreviewContent}

@@ -85,13 +85,3 @@ export async function readDocAsPlaintext(accessToken, docId) {
   // Strip the single trailing newline the Docs API always appends.
   return text.endsWith('\n') ? text.slice(0, -1) : text;
 }
-
-// Extracts the Google Drive file ID from a Drive file URL.
-// Handles the common formats:
-//   https://drive.google.com/file/d/{id}/view
-//   https://docs.google.com/document/d/{id}/edit
-export function extractDocId(url) {
-  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if (!match) throw new Error(`Could not extract doc ID from URL: ${url}`);
-  return match[1];
-}

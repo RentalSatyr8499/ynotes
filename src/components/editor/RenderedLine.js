@@ -7,9 +7,9 @@
 
 import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable } from 'react-native';
-import { parseBlocks } from '../features/notes/markdown';
-import { previewStyles } from '../styles/preview';
-import { editorStyles } from '../styles/editor';
+import { parseBlocks } from '../../features/notes/markdown';
+import { previewStyles } from '../../styles/preview';
+import { editorStyles } from '../../styles/editor';
 import InlineText from './InlineText';
 
 function CommittedLine({ text }) {

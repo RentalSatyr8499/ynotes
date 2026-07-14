@@ -52,4 +52,9 @@ export const screenStyles = StyleSheet.create({
     padding: 16,
     paddingTop: 4,
   },
+  centered: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

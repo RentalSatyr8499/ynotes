@@ -1,6 +1,7 @@
 // src/styles/notesBrowser.js
 
 import { StyleSheet, useWindowDimensions } from 'react-native';
+import { colors } from './tokens';
 
 export function useNotesBrowserStyles() {
   const { width, height } = useWindowDimensions();
@@ -13,11 +14,11 @@ export function useNotesBrowserStyles() {
     screen: {
       flex: 1,
       flexDirection: 'row',
-      backgroundColor: '#ffffff',
+      backgroundColor: colors.pageBg,
     },
     container: {
       flex: 1,
-      backgroundColor: '#ffffff',
+      backgroundColor: colors.pageBg,
     },
     header: {
       flexDirection: 'row',
@@ -30,20 +31,20 @@ export function useNotesBrowserStyles() {
     heading: {
       fontSize: headingSize,
       fontWeight: '200',
-      color: '#111',
+      color: colors.textDark,
       lineHeight: headingSize * 1.1,
     },
     refreshButton: {
       paddingHorizontal: 14,
       paddingVertical: 7,
       borderRadius: 8,
-      backgroundColor: '#f5f0eb',
+      backgroundColor: colors.editorBg,
       marginBottom: 4,
     },
     refreshText: {
       fontSize: 13,
       fontWeight: '600',
-      color: '#555',
+      color: colors.textMuted,
     },
     scrollContent: {
       paddingHorizontal: hMargin,
@@ -56,7 +57,7 @@ export function useNotesBrowserStyles() {
       fontWeight: '700',
       letterSpacing: 1.5,
       textTransform: 'uppercase',
-      color: '#bbb',
+      color: colors.textFaint,
       marginTop: vMargin * 0.75,
       marginBottom: 12,
     },
@@ -67,7 +68,7 @@ export function useNotesBrowserStyles() {
       paddingVertical: 12,
       paddingRight: 4,
       borderBottomWidth: 1,
-      borderBottomColor: '#f0f0f0',
+      borderBottomColor: colors.borderSubtle,
     },
     rowLeft: {
       flexDirection: 'row',
@@ -95,20 +96,20 @@ export function useNotesBrowserStyles() {
     },
     rowActionIconActive: {
       opacity: 1,
-      tintColor: '#000',
+      tintColor: colors.textDark,
     },
     rowActionText: {
       fontSize: 12,
       fontWeight: '500',
-      color: '#aaa',
+      color: colors.textDisabled,
     },
     rowActionTextActive: {
-      color: '#000',
+      color: colors.textDark,
       textDecorationLine: 'underline',
     },
     rowActionDivider: {
       fontSize: 12,
-      color: '#ddd',
+      color: colors.borderXLight,
     },
     rowIcon: {
       width: 18,
@@ -121,18 +122,18 @@ export function useNotesBrowserStyles() {
     },
     rowTitle: {
       fontSize: 16,
-      color: '#1a1a1a',
+      color: colors.textBody,
     },
     rowChevron: {
       fontSize: 18,
-      color: '#ccc',
+      color: colors.borderLight,
     },
     rowChevronOpen: {
       transform: [{ rotate: '90deg' }],
     },
     emptyText: {
       fontSize: 14,
-      color: '#ccc',
+      color: colors.borderLight,
       paddingVertical: 12,
     },
     centered: {
@@ -143,7 +144,7 @@ export function useNotesBrowserStyles() {
     },
     errorText: {
       fontSize: 15,
-      color: '#c0392b',
+      color: colors.errorText,
     },
     rowCreateInline: {
       flexDirection: 'row',
@@ -155,13 +156,13 @@ export function useNotesBrowserStyles() {
       borderRadius: 6,
       paddingHorizontal: 8,
       paddingVertical: 4,
-      fontSize: 12,           // matches rowActionText
+      fontSize: 12,
       fontStyle: 'italic',
-      color: '#1a1a1a',
+      color: colors.textBody,
       minWidth: 140,
-      backgroundColor: '#fafafa',
-      outlineStyle: 'none',   // removes browser focus ring
-      outlineWidth: 0,        // belt-and-suspenders for RN Web
+      backgroundColor: colors.inputBg,
+      outlineStyle: 'none',
+      outlineWidth: 0,
     },
   });
 

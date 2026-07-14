@@ -1,11 +1,13 @@
 // src/app/editor.js
 
-import React, { useCallback, useEffect } from 'react';
-import { View, Text, Pressable, useWindowDimensions, Platform } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, Text, useWindowDimensions, Platform } from 'react-native';
 import useNote from '../hooks/useNote';
+import LoadingAnimation from '../components/LoadingAnimation';
 import useLineEditor from '../hooks/useLineEditor';
-import EditorPane from '../components/EditorPane';
-import EditablePreviewPane from '../components/EditablePreviewPane';
+import EditorPane from '../components/editor/EditorPane';
+import EditablePreviewPane from '../components/editor/EditablePreviewPane';
+import EditorHeader from '../components/editor/EditorHeader';
 import { screenStyles } from '../styles/screen';
 
 function useWebStyles() {
@@ -21,13 +23,20 @@ function useWebStyles() {
   }, []);
 }
 
+const PANE = { NONE: null, EDITOR: 'editor', PREVIEW: 'preview' };
+
 export default function EditorScreen() {
   useWebStyles();
-  const [note, setNote, { loading, error }] = useNote();
+  const [note, setNote, { loading, error, title }] = useNote();
   const { width, height } = useWindowDimensions();
   const isNarrow = width < 700;
 
   const lineEditor = useLineEditor(note, setNote);
+  const [activePane, setActivePane] = useState(PANE.NONE);
+
+  // Sync status — placeholder shape; swap in a live value from useNote or
+  // a dedicated useSyncStatus hook when the backend integration is ready.
+  const syncStatus = { state: 'syncing' };
 
   useEffect(() => {
     lineEditor.syncFromExternalText(note);
@@ -39,12 +48,25 @@ export default function EditorScreen() {
     [setNote]
   );
 
+  const handleInsert = useCallback((syntax) => {
+    if (activePane === PANE.EDITOR) {
+      setNote((prev) => prev + syntax);
+    } else if (activePane === PANE.PREVIEW) {
+      lineEditor.onChangeLineText(lineEditor.focusedLineId, syntax);
+    }
+  }, [activePane, setNote, lineEditor]);
+
+  const handleFileAction = useCallback((action) => {
+    // Wire up to navigation/backend when ready
+    console.log('File action:', action);
+  }, []);
+
   const horizontalMargin = isNarrow ? 0 : width * 0.1;
   const verticalMargin   = height * 0.05;
 
   if (loading) return (
     <View style={[screenStyles.container, screenStyles.centered]}>
-      <Text>Loading…</Text>
+      <LoadingAnimation />
     </View>
   );
 
@@ -56,6 +78,11 @@ export default function EditorScreen() {
 
   return (
     <View style={screenStyles.container}>
+      <EditorHeader
+        title={title}
+        onFileAction={handleFileAction}
+        syncStatus={syncStatus}
+      />
       <View style={[
         screenStyles.panes,
         isNarrow ? screenStyles.panesStacked : null,
@@ -67,6 +94,9 @@ export default function EditorScreen() {
         <EditorPane
           value={note}
           onChangeText={handlePlaintextChange}
+          onFocus={() => setActivePane(PANE.EDITOR)}
+          isActive={activePane === PANE.EDITOR}
+          onInsert={handleInsert}
           style={[
             screenStyles.pane,
             isNarrow ? screenStyles.paneStacked : screenStyles.paneLeft,
@@ -78,9 +108,14 @@ export default function EditorScreen() {
           onChangeLineText={lineEditor.onChangeLineText}
           onEnter={lineEditor.onEnter}
           onDeleteEmptyLine={lineEditor.onDeleteEmptyLine}
-          onLineFocus={lineEditor.onLineFocus}
+          onLineFocus={(id) => {
+            lineEditor.onLineFocus(id);
+            setActivePane(PANE.PREVIEW);
+          }}
           onArrowUp={lineEditor.onArrowUp}
           onArrowDown={lineEditor.onArrowDown}
+          isActive={activePane === PANE.PREVIEW}
+          onInsert={handleInsert}
           style={[
             screenStyles.pane,
             isNarrow ? screenStyles.paneStacked : screenStyles.paneRight,
