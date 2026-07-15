@@ -14,22 +14,29 @@ export const editorHeaderStyles = StyleSheet.create({
     paddingBottom: 0,
   },
 
+  // Top row: [logo] [title] [sync status]
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    gap: 20,
+    marginBottom: 6,
+  },
+
   // Brand logo
   logo: {
-    width: 28,
-    height: 28,
-    marginBottom: 10,
+    width: 50,
+    height: 50,
   },
 
   // Note title
   title: {
-    fontSize: 15,
+    fontSize: 38,
     fontWeight: '600',
     color: colors.textBody,
-    marginBottom: 6,
+    flexShrink: 1,
   },
 
-  // Row containing File, Format, … Syncing
+  // Row containing File, Format
   menuBar: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -38,21 +45,19 @@ export const editorHeaderStyles = StyleSheet.create({
     paddingBottom: 2,
   },
 
-  // ── Sync status ───────────────────────────────────────────────────────────
+  // ── Sync status (in title row, after the title) ───────────────────────────
   syncItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    marginLeft: 'auto',
+    marginBottom: 6,
   },
   syncIcon: {
     width: 12,
     height: 12,
   },
   syncText: {
-    fontSize: 13,
+    fontSize: 12,
     color: colors.textDisabled,
   },
 });

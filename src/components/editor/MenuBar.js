@@ -1,12 +1,11 @@
 // src/components/editor/MenuBar.js
 //
-// The horizontal bar under the note title: File | Format | … | Syncing
-// Menus are defined here and passed down to MenuBarItem.
+// The horizontal bar under the title row: File | Format
+// Sync status has moved up to EditorHeader's title row.
 
 import React from 'react';
 import { View } from 'react-native';
 import MenuBarItem from './MenuBarItem';
-import SyncStatus from './SyncStatus';
 import { editorHeaderStyles as styles } from '../../styles/editorHeader';
 
 const FORMAT_OPTIONS = [
@@ -19,9 +18,7 @@ const FORMAT_OPTIONS = [
   { label: 'Link',        onPress: () => {} },
 ];
 
-// onFileAction is called with the action key so the parent screen can handle
-// navigation/logic (e.g. 'share', 'delete', 'download').
-export default function MenuBar({ onFileAction, syncStatus }) {
+export default function MenuBar({ onFileAction }) {
   const fileOptions = [
     { label: 'Share note',    onPress: () => onFileAction?.('share')    },
     { label: 'Delete note',   onPress: () => onFileAction?.('delete')   },
@@ -30,9 +27,8 @@ export default function MenuBar({ onFileAction, syncStatus }) {
 
   return (
     <View style={styles.menuBar}>
-      <MenuBarItem label="File"   options={fileOptions}   />
+      <MenuBarItem label="File"   options={fileOptions}    />
       <MenuBarItem label="Format" options={FORMAT_OPTIONS} />
-      <SyncStatus status={syncStatus} />
     </View>
   );
 }
