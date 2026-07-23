@@ -1,36 +1,30 @@
 // src/components/editor/SyncStatus.js
 //
-// Displays the current sync state. Accepts a `status` prop so the parent
-// can drive it from live backend state when that's ready.
-//
-// status shape:
-//   { state: 'synced' | 'syncing' | 'error' | 'offline', label?: string }
-//
-// Default (no prop): shows 'Syncing' with the neutral icon, ready to be
-// wired up.
+// Displays the current sync state. Accepts a `syncStatus` prop shaped as:
+//   { state: 'idle' | 'syncing' | 'error', error?: string, lastSyncedAt?: Date }
+// which matches the return value of useSyncStatus directly — no mapping needed.
 
 import React from 'react';
 import { View, Text, Image } from 'react-native';
 import { editorHeaderStyles as styles } from '../../styles/editorHeader';
 
 const SYNC_ICONS = {
-  synced:  require('../../assets/icons/online.png'),
+  idle:    require('../../assets/icons/online.png'),
   syncing: require('../../assets/icons/idle.png'),
   error:   require('../../assets/icons/close.png'),
-  offline: require('../../assets/icons/idle.png'),
 };
 
 const DEFAULT_LABELS = {
-  synced:  'Synced',
+  idle:    'Synced',
   syncing: 'Syncing',
   error:   'Error',
-  offline: 'Offline',
 };
 
-export default function SyncStatus({ status = { state: 'syncing' } }) {
-  const { state, label } = status;
-  const icon = SYNC_ICONS[state] ?? SYNC_ICONS.syncing;
-  const text = label ?? DEFAULT_LABELS[state] ?? 'Syncing';
+export default function SyncStatus({ syncStatus = { state: 'syncing' } }) {
+  const { state, error } = syncStatus;
+  const icon  = SYNC_ICONS[state]        ?? SYNC_ICONS.syncing;
+  const label = DEFAULT_LABELS[state]    ?? 'Syncing';
+  const text  = state === 'error' && error ? error : label;
 
   return (
     <View style={styles.syncItem}>

@@ -27,16 +27,12 @@ const PANE = { NONE: null, EDITOR: 'editor', PREVIEW: 'preview' };
 
 export default function EditorScreen() {
   useWebStyles();
-  const [note, setNote, { loading, error, title }] = useNote();
+  const [note, setNote, { loading, error, title, syncStatus }] = useNote();
   const { width, height } = useWindowDimensions();
   const isNarrow = width < 700;
 
   const lineEditor = useLineEditor(note, setNote);
   const [activePane, setActivePane] = useState(PANE.NONE);
-
-  // Sync status — placeholder shape; swap in a live value from useNote or
-  // a dedicated useSyncStatus hook when the backend integration is ready.
-  const syncStatus = { state: 'syncing' };
 
   useEffect(() => {
     lineEditor.syncFromExternalText(note);

@@ -96,3 +96,69 @@ export async function clearDoc(accessToken, docId, startIndex = 1) {
   });
   if (!res.ok) throw new Error(`clearDoc failed: ${res.status} ${await res.text()}`);
 }
+
+// Overwrites the entire body of a Google Doc with `plaintext`.
+//
+// Strategy: a single batchUpdate with two requests —
+//   1. deleteContentRange across the whole body (leaving the required
+//      trailing paragraph the Docs API always preserves)
+//   2. insertText at index 1 with the new content
+//
+// This is intentionally blunt: we treat the doc as a remote plaintext
+// store, not a rich document, so positional OT is unnecessary.
+//
+// Throws if the request fails so the sync loop knows not to advance `base`.
+export async function overwriteDoc(accessToken, docId, plaintext) {
+  // First fetch the current doc length so we know what range to clear.
+  const docRes = await fetch(
+    `${DOCS_API}/documents/${docId}?fields=body.content`,
+    { headers: { Authorization: `Bearer ${accessToken}` } }
+  );
+  if (!docRes.ok) {
+    throw new Error(`overwriteDoc: fetch failed ${docRes.status} ${await docRes.text()}`);
+  }
+  const doc         = await docRes.json();
+  const content     = doc.body.content;
+  const lastElement = content[content.length - 1];
+  const docLength   = lastElement.endIndex - 1;
+
+  // Build the batchUpdate payload.
+  // If the doc is already empty (length === 1, only the trailing paragraph
+  // marker), skip the delete and just insert.
+  const requests = [];
+
+  if (docLength > 1) {
+    requests.push({
+      deleteContentRange: {
+        range: { startIndex: 1, endIndex: docLength },
+      },
+    });
+  }
+
+  if (plaintext.length > 0) {
+    requests.push({
+      insertText: {
+        location: { index: 1 },
+        text: plaintext,
+      },
+    });
+  }
+
+  if (requests.length === 0) return; // nothing to do
+
+  const writeRes = await fetch(
+    `${DOCS_API}/documents/${docId}:batchUpdate`,
+    {
+      method:  'POST',
+      headers: {
+        Authorization:  `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ requests }),
+    }
+  );
+
+  if (!writeRes.ok) {
+    throw new Error(`overwriteDoc: write failed ${writeRes.status} ${await writeRes.text()}`);
+  }
+}
